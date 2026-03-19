@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Microbiome State Dashboard</title>
+
+<style>
+
+body{
+font-family:"Times New Roman",Times,serif;
+margin:40px;
+background:#f8f9fa;
+color:#2c3e50;
+}
+
+h1{margin-bottom:5px;}
+
+h3{
+color:#555;
+margin-top:0;
+margin-bottom:5px;
+}
+
+#disease-category{
+font-size:18px;
+font-weight:bold;
+margin-bottom:25px;
+}
+
+.metrics{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:20px;
+margin-bottom:35px;
+}
+
+.metric{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 3px 6px rgba(0,0,0,0.1);
+}
+
+.metric-title{
+font-size:14px;
+color:#777;
+}
+
+.metric-value{
+font-size:24px;
+font-weight:bold;
+}
+
+.report-section{
+margin-top:25px;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 6px rgba(0,0,0,0.1);
+max-width:450px;
+}
+
+.grid-container{
+display:grid;
+grid-template-columns:repeat(4,100px);
+gap:15px;
+margin-top:30px;
+margin-bottom:30px;
+}
+
+.grid-box{
+width:100px;
+height:100px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:12px;
+color:white;
+font-weight:bold;
+font-size:14px;
+box-shadow:0 4px 6px rgba(0,0,0,0.1);
+}
+
+.legend{
+max-width:450px;
+font-size:15px;
+line-height:1.6;
+}
+
+.gradient-bar{
+height:20px;
+background:linear-gradient(to right,#00338D,#E8F0F7,#C41E3A);
+border-radius:5px;
+margin-bottom:8px;
+}
+
+.legend-labels{
+display:flex;
+justify-content:space-between;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Microbiome State</h1>
+<h3 id="patient-header">Loading patient report...</h3>
+<div id="disease-category"></div>
+
+<div id="content">Loading microbiome data...</div>
+
+<script>
+
+/////////////////////////////////////////////////////
+//// GET PATIENT ID FROM URL
+/////////////////////////////////////////////////////
+
+const params = new URLSearchParams(window.location.search);
+const patient_id = params.get("id");
+
+if(!patient_id){
+
+document.getElementById("content").innerHTML =
+"<p style='color:red;'>No patient ID provided.</p>";
+
+}
+
+else{
+
+/////////////////////////////////////////////////////
+//// LOAD MICROBIOME DATABASE
+/////////////////////////////////////////////////////
+
+fetch("microbiome_reports.json")
+
+.then(r=>r.json())
+
+.then(db=>{
+
+let data = db[patient_id];
+
+if(!data){
+
+document.getElementById("content").innerHTML =
+`<p style='color:red;'>Patient ${patient_id} not found.</p>`;
+
+return;
+
+}
+
+/////////////////////////////////////////////////////
+//// HEADER INFORMATION
+/////////////////////////////////////////////////////
+
+document.getElementById("patient-header").innerText =
+`Patient ID: ${patient_id}`;
+
+let category = data.disease_category || "Not classified";
+
+let color = "#2c3e50";
+
+if(category === "Healthy") color = "green";
+if(category === "Moderate Dysbiosis") color = "orange";
+if(category === "Severe Dysbiosis") color = "red";
+
+document.getElementById("disease-category").innerHTML =
+`Disease Category: <span style="color:${color};">${category}</span>`;
+
+/////////////////////////////////////////////////////
+//// METRICS
+/////////////////////////////////////////////////////
+
+let html = `
+
+<div class="metrics">
+
+<div class="metric">
+<div class="metric-title">Microbiome Health Index</div>
+<div class="metric-value">${data.health_index}</div>
+</div>
+
+<div class="metric">
+<div class="metric-title">Alpha Diversity</div>
+<div class="metric-value">${data.alpha_diversity}</div>
+</div>
+
+<div class="metric">
+<div class="metric-title">Dysbiosis Score</div>
+<div class="metric-value">${data.dysbiosis}</div>
+</div>
+
+<div class="metric">
+<div class="metric-title">Stability Score</div>
+<div class="metric-value">${data.stability}</div>
+</div>
+
+</div>
+
+<div class="report-section">
+
+<h4>Microbiome Enterotype</h4>
+<p>${data.enterotype}</p>
+
+<h4>Dominant Microbial Modules</h4>
+
+<ul>
+${Object.entries(data.dominant_modules)
+.map(([k,v])=>`<li>${k}: ${v}</li>`).join("")}
+</ul>
+
+<h4>Disease Risk Signals</h4>
+
+<ul>
+<li>Inflammatory Risk: ${data.disease_risk.inflammatory}</li>
+<li>Metabolic Risk: ${data.disease_risk.metabolic}</li>
+<li>Immune Risk: ${data.disease_risk.immune}</li>
+</ul>
+
+<h4>Functional Potential</h4>
+
+<ul>
+<li>Butyrate Potential: ${data.functional_potential.butyrate}</li>
+<li>Inflammatory Load: ${data.functional_potential.inflammatory_load}</li>
+<li>Metabolic Capacity: ${data.functional_potential.metabolic_capacity}</li>
+</ul>
+
+</div>
+
+`;
+
+/////////////////////////////////////////////////////
+//// GRID VISUALIZATION
+/////////////////////////////////////////////////////
+
+if(data.module_values){
+
+html += `<div class="grid-container">`;
+
+data.module_values.forEach(val=>{
+
+let intensity = Math.min(Math.abs(val)*10,1);
+
+let bg = val>=0
+?`rgba(196,30,58,${intensity+0.15})`
+:`rgba(0,51,141,${intensity+0.15})`;
+
+html += `<div class="grid-box" style="background:${bg};">${val.toFixed(3)}</div>`;
+
+});
+
+html += `</div>`;
+
+}
+
+/////////////////////////////////////////////////////
+//// LEGEND
+/////////////////////////////////////////////////////
+
+html += `
+
+<div class="legend">
+
+<strong>Microbial Community Activity Index</strong>
+
+<div class="gradient-bar"></div>
+
+<div class="legend-labels">
+<span>Depleted</span>
+<span>Baseline</span>
+<span>Enriched</span>
+</div>
+
+<p>
+Each square represents a microbial community module derived from
+bacterial taxa that frequently co-occur across individuals.
+</p>
+
+<p>
+Blue indicates depletion, white baseline, and red enrichment.
+</p>
+
+</div>
+
+`;
+
+document.getElementById("content").innerHTML = html;
+
+})
+
+.catch(e=>{
+
+document.getElementById("content").innerHTML =
+`<p style='color:red;'>Error loading microbiome database: ${e}</p>`;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
