@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Microbiome Diagnostic Portal</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:"Times New Roman",serif;
+background:#f8f9fa;
+text-align:center;
+margin-top:80px;
+}
+
+.container{
+background:white;
+padding:40px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+width:400px;
+margin:auto;
+}
+
+input{
+padding:10px;
+font-size:18px;
+width:80%;
+margin-top:10px;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+font-size:16px;
+cursor:pointer;
+}
+
+#qr{
+margin-top:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Microbiome Diagnostic Portal</h2>
+
+<p>Enter Patient ID</p>
+
+<input id="patientID" placeholder="e.g. 009A">
+
+<br>
+
+<button onclick="generate()">Generate QR & Report</button>
+
+<div id="qr"></div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+
+function generate(){
+
+let id = document.getElementById("patientID").value.trim();
+
+if(!id){
+alert("Please enter patient ID");
+return;
+}
+
+let link =
+"https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
+
+document.getElementById("qr").innerHTML="";
+
+new QRCode(document.getElementById("qr"),{
+
+text: link,
+width:200,
+height:200
+
+});
+
+document.getElementById("qr").innerHTML +=
+`<p><a href="${link}" target="_blank">Open Report</a></p>`;
+
+}
+
+</script>
+
+</body>
+
+</html>
