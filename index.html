@@ -22,15 +22,17 @@ background:white;
 padding:40px;
 border-radius:10px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
-width:400px;
+width:420px;
 margin:auto;
 }
 
 input{
-padding:10px;
+padding:12px;
 font-size:18px;
 width:80%;
 margin-top:10px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 button{
@@ -38,10 +40,41 @@ margin-top:20px;
 padding:10px 20px;
 font-size:16px;
 cursor:pointer;
+border:none;
+border-radius:6px;
+margin-right:10px;
+}
+
+.generate{
+background:#2c3e50;
+color:white;
+}
+
+.generate:hover{
+background:#1a252f;
+}
+
+.refresh{
+background:#d9534f;
+color:white;
+}
+
+.refresh:hover{
+background:#b52b27;
+}
+
+#qrContainer{
+margin-top:30px;
 }
 
 #qr{
-margin-top:30px;
+margin-top:10px;
+}
+
+.report-link{
+margin-top:15px;
+display:block;
+font-weight:bold;
 }
 
 </style>
@@ -60,15 +93,24 @@ margin-top:30px;
 
 <br>
 
-<button onclick="generate()">Generate QR & Report</button>
+<button class="generate" onclick="generate()">Generate QR & Report</button>
+<button class="refresh" onclick="refreshPage()">Refresh</button>
+
+<div id="qrContainer">
 
 <div id="qr"></div>
 
+<a id="reportLink" class="report-link" target="_blank"></a>
+
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
+
+let qr;
 
 function generate(){
 
@@ -82,18 +124,31 @@ return;
 let link =
 "https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
 
-document.getElementById("qr").innerHTML="";
+let qrDiv = document.getElementById("qr");
 
-new QRCode(document.getElementById("qr"),{
+qrDiv.innerHTML = "";
 
+qr = new QRCode(qrDiv,{
 text: link,
 width:200,
 height:200
-
 });
 
-document.getElementById("qr").innerHTML +=
-`<p><a href="${link}" target="_blank">Open Report</a></p>`;
+let reportLink = document.getElementById("reportLink");
+
+reportLink.href = link;
+reportLink.innerText = "Open Report";
+
+}
+
+function refreshPage(){
+
+document.getElementById("patientID").value = "";
+
+document.getElementById("qr").innerHTML = "";
+
+document.getElementById("reportLink").innerText = "";
+document.getElementById("reportLink").href = "";
 
 }
 
