@@ -1,159 +1,141 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <title>Microbiome Diagnostic Portal</title>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-
-body{
-font-family:"Times New Roman",serif;
-background:#f8f9fa;
-text-align:center;
-margin-top:80px;
+body {
+    font-family: "Times New Roman", serif;
+    background: #f8f9fa;
+    text-align: center;
+    margin-top: 80px;
 }
 
-.container{
-background:white;
-padding:40px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
-width:420px;
-margin:auto;
+.container {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 420px;
+    margin: auto;
 }
 
-input{
-padding:12px;
-font-size:18px;
-width:80%;
-margin-top:10px;
-border-radius:6px;
-border:1px solid #ccc;
+input {
+    padding: 12px;
+    font-size: 18px;
+    width: 80%;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
 }
 
-button{
-margin-top:20px;
-padding:10px 20px;
-font-size:16px;
-cursor:pointer;
-border:none;
-border-radius:6px;
-margin-right:10px;
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    margin-right: 10px;
 }
 
-.generate{
-background:#2c3e50;
-color:white;
+.generate {
+    background: #2c3e50;
+    color: white;
 }
 
-.generate:hover{
-background:#1a252f;
+.generate:hover {
+    background: #1a252f;
 }
 
-.refresh{
-background:#d9534f;
-color:white;
+.refresh {
+    background: #d9534f;
+    color: white;
 }
 
-.refresh:hover{
-background:#b52b27;
+.refresh:hover {
+    background: #b52b27;
 }
 
-#qrContainer{
-margin-top:30px;
+#qrContainer {
+    margin-top: 30px;
 }
 
-#qr{
-margin-top:10px;
+/* Updated #qr CSS to perfectly center the QR code */
+#qr {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.report-link{
-margin-top:15px;
-display:block;
-font-weight:bold;
+.report-link {
+    margin-top: 20px;
+    display: block;
+    font-weight: bold;
 }
-
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
+    <h2>Microbiome Diagnostic Portal</h2>
+    <p>Enter Patient ID</p>
 
-<h2>Microbiome Diagnostic Portal</h2>
+    <input id="patientID" placeholder="e.g. 001A_val">
+    <br>
 
-<p>Enter Patient ID</p>
+    <button class="generate" onclick="generate()">Generate QR & Report</button>
+    <button class="refresh" onclick="refreshPage()">Refresh</button>
 
-<input id="patientID" placeholder="e.g. 009A">
-
-<br>
-
-<button class="generate" onclick="generate()">Generate QR & Report</button>
-<button class="refresh" onclick="refreshPage()">Refresh</button>
-
-<div id="qrContainer">
-
-<div id="qr"></div>
-
-<a id="reportLink" class="report-link" target="_blank"></a>
-
-</div>
-
+    <div id="qrContainer">
+        <div id="qr"></div>
+        <a id="reportLink" class="report-link" target="_blank"></a>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
-
 let qr;
 
-function generate(){
+function generate() {
+    let id = document.getElementById("patientID").value.trim();
 
-let id = document.getElementById("patientID").value.trim();
+    if(!id) {
+        alert("Please enter patient ID");
+        return;
+    }
 
-if(!id){
-alert("Please enter patient ID");
-return;
+    let link = "https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
+    let qrDiv = document.getElementById("qr");
+    
+    // Clear previous QR
+    qrDiv.innerHTML = "";
+
+    // Generate new QR
+    qr = new QRCode(qrDiv, {
+        text: link,
+        width: 200,
+        height: 200
+    });
+
+    // Update Report Link
+    let reportLink = document.getElementById("reportLink");
+    reportLink.href = link;
+    reportLink.innerText = "Open Report";
 }
 
-let link =
-"https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
-
-let qrDiv = document.getElementById("qr");
-
-qrDiv.innerHTML = "";
-
-qr = new QRCode(qrDiv,{
-text: link,
-width:200,
-height:200
-});
-
-let reportLink = document.getElementById("reportLink");
-
-reportLink.href = link;
-reportLink.innerText = "Open Report";
-
+function refreshPage() {
+    document.getElementById("patientID").value = "";
+    document.getElementById("qr").innerHTML = "";
+    document.getElementById("reportLink").innerText = "";
+    document.getElementById("reportLink").href = "";
 }
-
-function refreshPage(){
-
-document.getElementById("patientID").value = "";
-
-document.getElementById("qr").innerHTML = "";
-
-document.getElementById("reportLink").innerText = "";
-document.getElementById("reportLink").href = "";
-
-}
-
 </script>
 
 </body>
-
 </html>
