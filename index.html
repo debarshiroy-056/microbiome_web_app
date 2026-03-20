@@ -95,7 +95,7 @@
             background-color: #ffffff;
             color: #1c1c1e;
             transition: border-color 0.2s;
-            text-transform: uppercase;
+            /* Removed text-transform: uppercase here */
         }
 
         input[type="text"]:focus {
@@ -106,7 +106,6 @@
 
         input[type="text"]::placeholder {
             color: #aeaeb2;
-            text-transform: none;
         }
 
         /* Buttons */
@@ -247,7 +246,7 @@
                 </svg>
                 Patient Identification
             </div>
-            <input type="text" id="patientID" placeholder="Enter Patient ID (e.g. PT-1029)" oninput="this.value = this.value.toUpperCase()">
+            <input type="text" id="patientID" placeholder="Enter Patient ID (e.g. pt-1029)">
         </div>
 
         <div class="button-row">
