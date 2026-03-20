@@ -1,140 +1,345 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Microbiome Diagnostic Portal</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microbiome Profile</title>
+    
+    <style>
+        /* Base reset and system fonts */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
-body {
-    font-family: "Times New Roman", serif;
-    background: #f8f9fa;
-    text-align: center;
-    margin-top: 80px;
-}
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f2f2f7; /* iOS systemGroupedBackground */
+            color: #1c1c1e;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
 
-.container {
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 420px;
-    margin: auto;
-}
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
 
-input {
-    padding: 12px;
-    font-size: 18px;
-    width: 80%;
-    margin-top: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
 
-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    margin-right: 10px;
-}
+        .header svg {
+            color: #008080;
+            width: 42px;
+            height: 42px;
+            margin-bottom: 12px;
+        }
 
-.generate {
-    background: #2c3e50;
-    color: white;
-}
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1c1e;
+            margin-bottom: 6px;
+        }
 
-.generate:hover {
-    background: #1a252f;
-}
+        .header p {
+            font-size: 15px;
+            color: #8e8e93;
+        }
 
-.refresh {
-    background: #d9534f;
-    color: white;
-}
+        /* Cards */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
 
-.refresh:hover {
-    background: #b52b27;
-}
+        /* Input Section */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
 
-#qrContainer {
-    margin-top: 30px;
-}
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
 
-/* Updated #qr CSS to perfectly center the QR code */
-#qr {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        .input-label svg {
+            width: 18px;
+            height: 18px;
+            color: #008080;
+        }
 
-.report-link {
-    margin-top: 20px;
-    display: block;
-    font-weight: bold;
-}
-</style>
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #d1d1d6;
+            border-radius: 10px;
+            background-color: #ffffff;
+            color: #1c1c1e;
+            transition: border-color 0.2s;
+            text-transform: uppercase;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #008080;
+            box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #aeaeb2;
+            text-transform: none;
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .btn-generate {
+            flex: 1;
+            padding: 14px;
+            background-color: #008080;
+            color: white;
+        }
+
+        .btn-generate:hover {
+            opacity: 0.9;
+        }
+
+        .btn-refresh {
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 128, 128, 0.1);
+            color: #008080;
+        }
+
+        .btn-refresh svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-refresh:hover {
+            background-color: rgba(0, 128, 128, 0.2);
+        }
+
+        /* QR Output Section */
+        #outputCard {
+            display: none; /* Hidden by default */
+            text-align: center;
+            animation: slideUpFade 0.4s ease-out forwards;
+        }
+
+        .scan-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #8e8e93;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .qr-wrapper {
+            display: inline-block;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        #qr {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .report-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: rgba(0, 128, 128, 0.1);
+            color: #008080;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .report-link:hover {
+            background-color: rgba(0, 128, 128, 0.2);
+        }
+
+        .report-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Animation Keyframes */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h2>Microbiome Diagnostic Portal</h2>
-    <p>Enter Patient ID</p>
-
-    <input id="patientID" placeholder="e.g. 001A_val">
-    <br>
-
-    <button class="generate" onclick="generate()">Generate QR & Report</button>
-    <button class="refresh" onclick="refreshPage()">Refresh</button>
-
-    <div id="qrContainer">
-        <div id="qr"></div>
-        <a id="reportLink" class="report-link" target="_blank"></a>
+<div class="app-container">
+    
+    <div class="header">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+        </svg>
+        <h1>Microbiome Profile</h1>
+        <p>Generate patient QR codes for clinical access</p>
     </div>
+
+    <div class="card">
+        <div class="input-group">
+            <div class="input-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Patient Identification
+            </div>
+            <input type="text" id="patientID" placeholder="Enter Patient ID (e.g. PT-1029)" oninput="this.value = this.value.toUpperCase()">
+        </div>
+
+        <div class="button-row">
+            <button class="btn-generate" onclick="generate()">Generate QR</button>
+            <button class="btn-refresh" onclick="refreshPage()" title="Refresh">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="outputCard" class="card">
+        <div class="scan-label">Scan to View Report</div>
+        
+        <div class="qr-wrapper">
+            <div id="qr"></div>
+        </div>
+
+        <a id="reportLink" class="report-link" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            Open Clinical Report
+        </a>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
-let qr;
+    let qr;
 
-function generate() {
-    let id = document.getElementById("patientID").value.trim();
+    function generate() {
+        let inputField = document.getElementById("patientID");
+        let id = inputField.value.trim();
 
-    if(!id) {
-        alert("Please enter patient ID");
-        return;
+        if(!id) {
+            alert("Please enter a valid Patient ID.");
+            inputField.focus();
+            return;
+        }
+
+        // The exact URL logic from your original code
+        let link = "https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
+        
+        let qrDiv = document.getElementById("qr");
+        let outputCard = document.getElementById("outputCard");
+        
+        // Temporarily hide to re-trigger the CSS animation
+        outputCard.style.display = "none";
+        
+        // Force a reflow to ensure the animation restarts
+        void outputCard.offsetWidth; 
+
+        // Clear previous QR
+        qrDiv.innerHTML = "";
+
+        // Generate new QR
+        qr = new QRCode(qrDiv, {
+            text: link,
+            width: 200,
+            height: 200,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // Update Report Link
+        let reportLink = document.getElementById("reportLink");
+        reportLink.href = link;
+
+        // Show the output card with animation
+        outputCard.style.display = "block";
+        
+        // Remove focus from input to hide keyboard on mobile
+        inputField.blur();
     }
 
-    let link = "https://debarshiroy-056.github.io/microbiome_web_app/sample.html?id=" + id;
-    let qrDiv = document.getElementById("qr");
-    
-    // Clear previous QR
-    qrDiv.innerHTML = "";
-
-    // Generate new QR
-    qr = new QRCode(qrDiv, {
-        text: link,
-        width: 200,
-        height: 200
-    });
-
-    // Update Report Link
-    let reportLink = document.getElementById("reportLink");
-    reportLink.href = link;
-    reportLink.innerText = "Open Report";
-}
-
-function refreshPage() {
-    document.getElementById("patientID").value = "";
-    document.getElementById("qr").innerHTML = "";
-    document.getElementById("reportLink").innerText = "";
-    document.getElementById("reportLink").href = "";
-}
+    function refreshPage() {
+        document.getElementById("patientID").value = "";
+        
+        // Hide the output card instead of just clearing the innerHTML
+        document.getElementById("outputCard").style.display = "none";
+        
+        // Return focus to the input field
+        document.getElementById("patientID").focus();
+    }
 </script>
 
 </body>
